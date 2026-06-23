@@ -75,3 +75,31 @@ export async function getContactsSummary(ulid = process.env.ASSOCONNECT_ORGANIZA
   );
   return { total: data["hydra:totalItems"] };
 }
+
+export async function listContacts(params: {
+  page?: number;
+  itemsPerPage?: number;
+  type?: string;
+  ulid?: string;
+}) {
+  const ulid = params.ulid ?? process.env.ASSOCONNECT_ORGANIZATION_ULID;
+  if (!ulid) throw new Error("ASSOCONNECT_ORGANIZATION_ULID is not set");
+  const qs = new URLSearchParams();
+  if (params.page) qs.set("page", String(params.page));
+  if (params.itemsPerPage) qs.set("itemsPerPage", String(params.itemsPerPage));
+  if (params.type) qs.set("type", params.type);
+  qs.set("pagination", "true");
+  return request<CollectionResponse<Contact>>(`/organizations/${ulid}/contacts?${qs}`);
+}
+
+export function getContact(id: string) {
+  return request<Contact>(`/crm/contacts/${id}`);
+}
+
+export function getPerson(id: string) {
+  return request<{ "@id": string; firstName?: string; lastName?: string; dateOfBirth?: string }>(`/crm/people/${id}`);
+}
+
+export function getPersonAddress(id: string) {
+  return request<{ street1?: string; street2?: string; postal?: string; city?: string; country?: string }>(`/crm/people/${id}/address`);
+}
