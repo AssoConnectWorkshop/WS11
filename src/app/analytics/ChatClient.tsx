@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, FormEvent } from "react";
+import { APP_VERSION } from "@/config/version";
 
 type Message = { role: "user" | "assistant"; content: string };
 
@@ -270,12 +271,6 @@ export default function ChatClient() {
           <div ref={bottomRef} />
         </div>
 
-        {/* Footer */}
-        <div className="flex-none bg-white border-t px-6 py-1.5 flex items-center justify-between text-xs text-gray-300">
-          <span>Built with love avec mon cul et Claudo AI — v1</span>
-          <span>CGUV: yolo lol</span>
-        </div>
-
         {/* Input bar */}
         <div className="flex-none bg-white border-t px-6 py-4">
           <form onSubmit={send} className="flex gap-3 max-w-3xl mx-auto">
@@ -297,6 +292,12 @@ export default function ChatClient() {
               Send
             </button>
           </form>
+        </div>
+
+        {/* Footer */}
+        <div className="flex-none bg-white border-t px-6 py-1.5 flex items-center justify-between text-xs text-gray-300">
+          <span>Built with love avec mon cul et Claudo AI — {APP_VERSION}</span>
+          <span>CGUV: yolo lol</span>
         </div>
       </div>
     </div>
