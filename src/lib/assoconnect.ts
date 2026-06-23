@@ -38,3 +38,40 @@ export function getOrganization(ulid = process.env.ASSOCONNECT_ORGANIZATION_ULID
   if (!ulid) throw new Error("ASSOCONNECT_ORGANIZATION_ULID is not set");
   return request<Organization>(`/organizations/${ulid}`);
 }
+
+export type StatsCrm = {
+  "@id": string;
+  "@type": string;
+  totalContacts: number;
+  totalPersons: number;
+  totalOrganizations: number;
+  totalMembers: number;
+  totalActiveMembers: number;
+  [key: string]: unknown;
+};
+
+export type Contact = {
+  "@id": string;
+  "@type": string;
+  type: string;
+  email?: string;
+  [key: string]: unknown;
+};
+
+type CollectionResponse<T> = {
+  "hydra:member": T[];
+  "hydra:totalItems": number;
+};
+
+export function getStatsCrm(ulid = process.env.ASSOCONNECT_ORGANIZATION_ULID) {
+  if (!ulid) throw new Error("ASSOCONNECT_ORGANIZATION_ULID is not set");
+  return request<StatsCrm>(`/organizations/${ulid}/stats_crm`);
+}
+
+export async function getContactsSummary(ulid = process.env.ASSOCONNECT_ORGANIZATION_ULID) {
+  if (!ulid) throw new Error("ASSOCONNECT_ORGANIZATION_ULID is not set");
+  const data = await request<CollectionResponse<Contact>>(
+    `/organizations/${ulid}/contacts?itemsPerPage=1&pagination=true`
+  );
+  return { total: data["hydra:totalItems"] };
+}
