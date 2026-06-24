@@ -536,52 +536,107 @@ function renderSingle(tool: string, d: R) {
 }
 
 type CollectMember = {
-  membership?: { plan?: { price?: number; type?: string } };
-  donation?: { amount?: number };
+  membership?: { plan?: { price?: number; type?: string }; selectedAt?: string };
+  donation?: { amount?: number; selectedAt?: string };
 };
 type Collect = R & { name?: string; pricingPlans?: R[]; members?: CollectMember[] };
+
+const MONTH_LABELS: Record<string, string> = {
+  "01": "Jan", "02": "Fév", "03": "Mar", "04": "Avr",
+  "05": "Mai", "06": "Juin", "07": "Juil", "08": "Août",
+  "09": "Sep", "10": "Oct", "11": "Nov", "12": "Déc",
+};
+
+function MonthlyBarChart({ monthly }: { monthly: { month: string; membership: number; donation: number }[] }) {
+  if (!monthly.length) return null;
+  const maxVal = Math.max(...monthly.map(m => m.membership + m.donation), 1);
+  const barW = 28, gap = 10, chartH = 80, labelH = 20;
+  const totalW = monthly.length * (barW + gap) - gap;
+  const totalH = chartH + labelH + 8;
+
+  return (
+    <svg viewBox={`0 0 ${totalW} ${totalH}`} width="100%" style={{ display: "block", overflow: "visible" }}>
+      {monthly.map((m, i) => {
+        const x = i * (barW + gap);
+        const mH = Math.max((m.membership / maxVal) * chartH, m.membership > 0 ? 2 : 0);
+        const dH = Math.max((m.donation / maxVal) * chartH, m.donation > 0 ? 2 : 0);
+        const [yr, mo] = m.month.split("-");
+        const label = (MONTH_LABELS[mo] ?? mo) + " " + yr.slice(2);
+        return (
+          <g key={m.month}>
+            <rect x={x} y={chartH - mH} width={barW} height={mH} rx={3} fill="var(--color-primary)" opacity={0.85} />
+            <rect x={x} y={chartH - mH - dH} width={barW} height={dH} rx={3} fill="var(--color-accent-mint)" opacity={0.9} />
+            <text x={x + barW / 2} y={chartH + labelH} textAnchor="middle" fontSize={8} fill="var(--color-text-muted)" fontFamily="Roboto, sans-serif">{label}</text>
+            {(m.membership + m.donation) > 0 && (
+              <text x={x + barW / 2} y={chartH - mH - dH - 3} textAnchor="middle" fontSize={7} fill="var(--color-text-muted)" fontFamily="Roboto, sans-serif">
+                {(m.membership + m.donation).toLocaleString("fr-FR")}
+              </text>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
 
 function renderFetchCollects(data: unknown) {
   const collects: Collect[] = Array.isArray(data) ? data as Collect[] : [data as Collect];
 
   let totalMembership = 0, totalDonation = 0;
   const perCollect: { label: string; membership: number; donation: number }[] = [];
+  const monthlyMap: Record<string, { membership: number; donation: number }> = {};
 
   for (const c of collects) {
     let cMembership = 0, cDonation = 0;
     for (const m of c.members ?? []) {
-      cMembership += m.membership?.plan?.price ?? 0;
-      cDonation += m.donation?.amount ?? 0;
+      const mPrice = m.membership?.plan?.price ?? 0;
+      cMembership += mPrice;
+      const mMonth = (m.membership?.selectedAt ?? "").slice(0, 7);
+      if (mMonth) {
+        monthlyMap[mMonth] = monthlyMap[mMonth] ?? { membership: 0, donation: 0 };
+        monthlyMap[mMonth].membership += mPrice;
+      }
+      const dAmount = m.donation?.amount ?? 0;
+      cDonation += dAmount;
+      if (dAmount > 0) {
+        const dMonth = (m.donation?.selectedAt ?? m.membership?.selectedAt ?? "").slice(0, 7);
+        if (dMonth) {
+          monthlyMap[dMonth] = monthlyMap[dMonth] ?? { membership: 0, donation: 0 };
+          monthlyMap[dMonth].donation += dAmount;
+        }
+      }
     }
     totalMembership += cMembership;
     totalDonation += cDonation;
     perCollect.push({ label: String(c.name ?? "Collecte"), membership: cMembership, donation: cDonation });
   }
 
+  const monthly = Object.keys(monthlyMap).sort().map(month => ({ month, ...monthlyMap[month] }));
   const total = totalMembership + totalDonation;
 
   return (
-    <VizCard title="Adhésions & Dons" subtitle={`${collects.length} collecte${collects.length > 1 ? "s" : ""} · ${total.toLocaleString("fr-FR")} € au total`}>
-      <DonutChart data={[
-        { label: "Adhésions", value: totalMembership },
-        { label: "Dons", value: totalDonation },
-      ]} />
-      {perCollect.length > 1 && (
-        <div style={{ marginTop: "0.75rem" }}>
-          <div style={{ fontFamily: "Roboto, sans-serif", fontSize: "0.6875rem", color: "var(--color-text-muted)", marginBottom: "0.375rem" }}>Par collecte</div>
-          <HBarChart data={perCollect.map(c => ({ label: c.label, value: c.membership + c.donation }))} />
+    <>
+      <VizCard title="Adhésions & Dons" subtitle={`${collects.length} collecte${collects.length > 1 ? "s" : ""} · ${total.toLocaleString("fr-FR")} € au total`}>
+        <DonutChart data={[
+          { label: "Adhésions", value: totalMembership },
+          { label: "Dons", value: totalDonation },
+        ]} />
+        <div style={{ marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+          {perCollect.map((c, i) => (
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", fontFamily: "Roboto, sans-serif", fontSize: "0.6875rem", padding: "0.25rem 0", borderBottom: "1px solid var(--color-border)" }}>
+              <span style={{ color: "var(--color-text-body)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: "0.5rem" }}>{c.label}</span>
+              <span style={{ color: "var(--color-primary)", flexShrink: 0 }}>{c.membership.toLocaleString("fr-FR")} €</span>
+              {c.donation > 0 && <span style={{ color: "#00C1A2", flexShrink: 0, marginLeft: "0.5rem" }}>+{c.donation.toLocaleString("fr-FR")} € dons</span>}
+            </div>
+          ))}
         </div>
+      </VizCard>
+      {monthly.length > 1 && (
+        <VizCard title="Évolution mensuelle" subtitle="Adhésions (bleu) + Dons (vert)">
+          <MonthlyBarChart monthly={monthly} />
+        </VizCard>
       )}
-      <div style={{ marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-        {perCollect.map((c, i) => (
-          <div key={i} style={{ display: "flex", justifyContent: "space-between", fontFamily: "Roboto, sans-serif", fontSize: "0.6875rem", padding: "0.25rem 0", borderBottom: "1px solid var(--color-border)" }}>
-            <span style={{ color: "var(--color-text-body)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: "0.5rem" }}>{c.label}</span>
-            <span style={{ color: "var(--color-primary)", flexShrink: 0 }}>{c.membership.toLocaleString("fr-FR")} €</span>
-            {c.donation > 0 && <span style={{ color: "var(--color-accent-mint)", flexShrink: 0, marginLeft: "0.5rem" }}>+{c.donation.toLocaleString("fr-FR")} € dons</span>}
-          </div>
-        ))}
-      </div>
-    </VizCard>
+    </>
   );
 }
 
