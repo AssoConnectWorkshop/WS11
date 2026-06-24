@@ -8,6 +8,7 @@ import {
   listCollects, getCollect, listAnalyticsPages,
   listEmailCampaigns, getEmailCampaign, listEmailCampaignMessages, listEmailCampaignBlockedMessages,
 } from "@/lib/assoconnect";
+import fixtureData from "@/data/membership-collects-fixture.json";
 
 export const runtime = "nodejs";
 
@@ -16,6 +17,11 @@ Your job: turn association data into clear, actionable insight for non-technical
 
 You have tools spanning all modules: CRM, Payments, Accounting, Banking, Website/Forms, and Emailing.
 Always use your tools to fetch real data when the user asks — never say you don't have access.
+
+For membership collects, use the fetch_collects tool — it returns fixture data from three demo collects:
+- "Adhésion 2024 - Association Générale" (ID 01ARZ3NDEKTSV4RRFFQ): standard (50€) + student (25€) plans, ~30 members, ~50% donors.
+- "Collecte Jeunesse 2024" (ID 01ARZ3NDEKTSV4RRFFQ1): classic youth (30€) + premium youth (60€) plans, ~30 members.
+- "Programme Partenaires Privilégiés" (ID 01ARZ3NDEKTSV4RRFFQ2): bronze (150€), silver (300€), gold (600€) partner plans, ~30 members.
 
 Workflow:
 1. Call the relevant tool(s) first, then answer based on the real data returned.
@@ -65,6 +71,9 @@ const tools: Anthropic.Tool[] = [
   tool("get_psp_sub_wallet_balance", "Balance of a PSP sub-wallet.", { id: { type: "string", description: "PSP sub-wallet ULID" } }, ["id"]),
   tool("list_collects", "Online forms (membership, donation, event, product).", PP),
   tool("get_collect", "Details of a form/collect.", IP, ["id"]),
+  tool("fetch_collects", "Fetch membership collect fixture data. Optionally filter by collect ID. Returns collects with pricingPlans and members (including donation info).", {
+    collectId: { type: "string", description: "Optional collect ID to fetch a single collect (e.g. '01ARZ3NDEKTSV4RRFFQ')" },
+  }),
   tool("list_analytics_pages", "Website page analytics."),
   tool("list_email_campaigns", "Email campaigns.", PP),
   tool("get_email_campaign", "Details and stats for one campaign.", IP, ["id"]),
@@ -103,6 +112,14 @@ async function runTool(name: string, input: ToolInput): Promise<unknown> {
     case "get_psp_sub_wallet_balance": return getPspSubWalletBalance(extractId(input.id as string));
     case "list_collects": return listCollects(pg());
     case "get_collect": return getCollect(extractId(input.id as string));
+    case "fetch_collects": {
+      const collects = fixtureData.collects;
+      const collectId = input.collectId as string | undefined;
+      if (collectId) {
+        return collects.find(c => c["@id"].includes(collectId)) ?? null;
+      }
+      return collects;
+    }
     case "list_analytics_pages": return listAnalyticsPages();
     case "list_email_campaigns": return listEmailCampaigns(pg());
     case "get_email_campaign": return getEmailCampaign(extractId(input.id as string));
