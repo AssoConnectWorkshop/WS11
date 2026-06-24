@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, FormEvent } from "react";
-import { APP_VERSION } from "@/config/version";
+import { APP_VERSION, LAST_PUSH_UTC } from "@/config/version";
 import VisualizationPanel, { VizItem } from "./VisualizationPanel";
 
 type Message = { role: "user" | "assistant"; content: string };
@@ -250,7 +250,7 @@ export default function ChatClient() {
 
         {/* Footer */}
         <div className="flex-none flex items-center justify-between" style={{ background: "var(--color-white)", borderTop: "1px solid var(--color-border)", padding: "0.3rem 1.25rem" }}>
-          <span style={{ fontFamily: "var(--font-body)", fontSize: "0.625rem", color: "var(--color-text-muted)" }}>Built with love avec mon cul et Claudo AI — {APP_VERSION}</span>
+          <span style={{ fontFamily: "var(--font-body)", fontSize: "0.625rem", color: "var(--color-text-muted)" }}>Built with love avec mon cul et Claudo AI — {APP_VERSION} · Pushed {LAST_PUSH_UTC}</span>
           <span style={{ fontFamily: "var(--font-body)", fontSize: "0.625rem", color: "var(--color-text-muted)" }}>CGUV: yolo lol</span>
         </div>
       </div>
