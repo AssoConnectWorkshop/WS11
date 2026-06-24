@@ -38,6 +38,19 @@ Because the data is already shown visually on the right, DO NOT repeat it in you
 Your text reply must be SHORT (2–4 sentences max): one key insight or conclusion drawn from the data, and optionally 1 follow-up suggestion.
 Never list contacts, invoices, entries, campaigns, or any tabular data in your text — it's already on the right.
 
+VISUALIZATION TOOL — render_visualization:
+After fetching data, always call render_visualization to display results.
+Choose the type that best fits the answer:
+- "stat_grid": key metrics / KPIs. data: { stats: [{ label: string, value: string|number, accent?: boolean }] }
+- "donut": part-of-whole breakdown. data: { segments: [{ label: string, value: number }] }
+- "bar": ranked comparison. data: { bars: [{ label: string, value: number }] }
+- "monthly_bar": time evolution by month. data: { months: [{ month: string (YYYY-MM), membership?: number, donation?: number, total?: number }] }
+- "table": list of records. data: { columns: [{ key: string, label: string }], rows: Record<string, unknown>[] }
+
+Always pre-aggregate the data yourself — never pass raw API arrays.
+You can call render_visualization multiple times in one turn to show several charts.
+The render_visualization result is NOT shown in chat — only in the right panel.
+
 Response style:
 - ALWAYS start every response with exactly "C'est la daronne d'Axel qui dit que..." followed by your answer.
 - Plain language, no jargon.
@@ -87,6 +100,16 @@ const tools: Anthropic.Tool[] = [
   tool("get_email_campaign", "Details and stats for one campaign.", IP, ["id"]),
   tool("list_email_campaign_messages", "Messages sent within a campaign.", { id: { type: "string", description: "Campaign ULID" }, ...PP }, ["id"]),
   tool("list_email_campaign_blocked_messages", "Bounced/blocked messages for a campaign.", { id: { type: "string", description: "Campaign ULID" }, ...PP }, ["id"]),
+  tool("render_visualization",
+    "Display a chart or table in the right panel. Call this after fetching and computing data. Choose the best visualization type for the answer.",
+    {
+      type: { type: "string", description: "Chart type: 'donut' | 'bar' | 'stat_grid' | 'table' | 'monthly_bar'" },
+      title: { type: "string", description: "Card title" },
+      subtitle: { type: "string", description: "Optional subtitle" },
+      data: { type: "object", description: "Chart data. Structure depends on type (see below)." },
+    },
+    ["type", "title", "data"]
+  ),
 ];
 
 type ToolInput = Record<string, unknown>;
@@ -133,6 +156,7 @@ async function runTool(name: string, input: ToolInput): Promise<unknown> {
     case "get_email_campaign": return getEmailCampaign(extractId(input.id as string));
     case "list_email_campaign_messages": return listEmailCampaignMessages(extractId(input.id as string), pg());
     case "list_email_campaign_blocked_messages": return listEmailCampaignBlockedMessages(extractId(input.id as string), pg());
+    case "render_visualization": return { ok: true };
     default: throw new Error(`Unknown tool: ${name}`);
   }
 }
@@ -203,7 +227,11 @@ Total active members: ${stats.totalActiveMembers ?? "N/A"}
             let result: unknown;
             try {
               result = await runTool(block.name, block.input as ToolInput);
-              emit({ type: "viz", tool: block.name, data: result });
+              if (block.name === "render_visualization") {
+                emit({ type: "viz", tool: block.name, data: block.input });
+              } else {
+                emit({ type: "viz", tool: block.name, data: result });
+              }
             } catch (err) {
               result = { error: String(err) };
             }

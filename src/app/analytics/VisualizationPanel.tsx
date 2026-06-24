@@ -640,12 +640,46 @@ function renderFetchCollects(data: unknown) {
   );
 }
 
+// ─── render_visualization dispatcher ─────────────────────────────────────────
+
+function renderVisualization(input: unknown) {
+  if (!input || typeof input !== "object") return null;
+  const d = input as { type: string; title: string; subtitle?: string; data: unknown };
+  const { type, title, subtitle, data } = d;
+
+  switch (type) {
+    case "stat_grid": {
+      const { stats } = data as { stats: { label: string; value: string | number; accent?: boolean }[] };
+      return <VizCard title={title} subtitle={subtitle}><StatGrid items={stats} /></VizCard>;
+    }
+    case "donut": {
+      const { segments } = data as { segments: { label: string; value: number }[] };
+      return <VizCard title={title} subtitle={subtitle}><DonutChart data={segments} /></VizCard>;
+    }
+    case "bar": {
+      const { bars } = data as { bars: { label: string; value: number }[] };
+      return <VizCard title={title} subtitle={subtitle}><HBarChart data={bars} /></VizCard>;
+    }
+    case "monthly_bar": {
+      const { months } = data as { months: { month: string; membership?: number; donation?: number; total?: number }[] };
+      return <VizCard title={title} subtitle={subtitle}><MonthlyBarChart monthly={months.map(m => ({ month: m.month, membership: m.membership ?? m.total ?? 0, donation: m.donation ?? 0 }))} /></VizCard>;
+    }
+    case "table": {
+      const { columns, rows } = data as { columns: { key: string; label: string }[]; rows: Record<string, unknown>[] };
+      return <VizCard title={title} subtitle={subtitle}><DataTable rows={rows} columns={columns} /></VizCard>;
+    }
+    default:
+      return <VizCard title={title} subtitle={subtitle}><KeyValueCard data={data as Record<string, unknown>} /></VizCard>;
+  }
+}
+
 // ─── Main dispatcher ──────────────────────────────────────────────────────────
 
 function renderItem(tool: string, data: unknown): React.ReactNode {
   if (!data || typeof data !== "object") return null;
   const d = data as R;
 
+  if (tool === "render_visualization") return renderVisualization(data);
   if (tool === "get_stats_crm") return renderStatsCrm(d);
   if (tool === "fetch_collects") return renderFetchCollects(data);
 
