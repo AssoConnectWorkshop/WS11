@@ -26,7 +26,7 @@ const SUGGESTIONS = [
   "What's my account balance?",
 ];
 
-function Sidebar() {
+function Sidebar({ onNav }: { onNav: (label: string) => void }) {
   return (
     <aside className="flex flex-col flex-none" style={{ width: "13rem", minHeight: "100vh", background: "var(--gradient-cta)" }}>
       <div className="flex flex-col items-center gap-1 px-4 pt-6 pb-4">
@@ -43,7 +43,7 @@ function Sidebar() {
       <div style={{ background: "rgba(255,255,255,0.15)", height: "1px", margin: "0 1rem" }} />
       <nav className="flex flex-col flex-1 overflow-y-auto" style={{ padding: "0.75rem 0.5rem", gap: "2px" }}>
         {NAV_ITEMS.map((item) => (
-          <button key={item.label} className="flex items-center w-full text-left" style={{ gap: "0.625rem", padding: "0.4rem 0.625rem", borderRadius: "var(--radius-md)", color: "rgba(255,255,255,0.7)", background: "transparent", fontFamily: "var(--font-body)", fontSize: "0.8125rem", transition: "background var(--duration-fast)", cursor: "pointer", border: "none" }}
+          <button key={item.label} onClick={() => onNav(item.label)} className="flex items-center w-full text-left" style={{ gap: "0.625rem", padding: "0.4rem 0.625rem", borderRadius: "var(--radius-md)", color: "rgba(255,255,255,0.7)", background: "transparent", fontFamily: "var(--font-body)", fontSize: "0.8125rem", transition: "background var(--duration-fast)", cursor: "pointer", border: "none" }}
             onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}>
             <span style={{ fontSize: "0.9375rem", width: "1.125rem", textAlign: "center" }}>{item.icon}</span>
@@ -76,10 +76,16 @@ export default function ChatClient() {
   const [vizItems, setVizItems] = useState<VizItem[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState<"chat" | "accounting">("chat");
   const bottomRef = useRef<HTMLDivElement>(null);
   const vizIdRef = useRef(0);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+  function handleNav(label: string) {
+    if (label === "Accounting") setPage("accounting");
+    else setPage("chat");
+  }
 
   async function send(e: FormEvent) {
     e.preventDefault();
@@ -143,9 +149,22 @@ export default function ChatClient() {
     }
   }
 
+  if (page === "accounting") {
+    return (
+      <div className="flex h-screen overflow-hidden" style={{ background: "var(--color-bg-grey)" }}>
+        <Sidebar onNav={handleNav} />
+        <div className="flex flex-1 flex-col items-center justify-center" style={{ background: "#ffc0cb" }}>
+          <h2 style={{ fontFamily: "var(--font-heading)", fontSize: "2.5rem", letterSpacing: "-1px", color: "#c0006e", marginBottom: "2rem" }}>CHEH pas de compta</h2>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/axel-mum.jpg" alt="axel mum" style={{ maxWidth: "320px", borderRadius: "1rem", boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: "var(--color-bg-grey)" }}>
-      <Sidebar />
+      <Sidebar onNav={handleNav} />
 
       {/* Content: chat + viz side by side */}
       <div className="flex flex-col flex-1 overflow-hidden">
