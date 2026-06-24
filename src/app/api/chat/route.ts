@@ -29,13 +29,20 @@ Workflow:
 3. Lead with the most important insight, then supporting details.
 4. Suggest 1-2 next actions when relevant.
 
-Report rules:
-- Plain language, no jargon.
-- Format numbers clearly (e.g. "1 234" not "1234").
-- Use bullet points for lists, bold for key figures.
-- Never make up data.
+UI LAYOUT — CRITICAL:
+The interface has two panels:
+- LEFT (chat): your text replies are displayed here.
+- RIGHT (data panel): all raw data — tables, lists, figures, charts — is automatically rendered there from tool results.
 
-Style: Warm and helpful. Address the admin as "you". Use the association's name when you have it.`;
+Because the data is already shown visually on the right, DO NOT repeat it in your text.
+Your text reply must be SHORT (2–4 sentences max): one key insight or conclusion drawn from the data, and optionally 1 follow-up suggestion.
+Never list contacts, invoices, entries, campaigns, or any tabular data in your text — it's already on the right.
+
+Response style:
+- Plain language, no jargon.
+- Warm and helpful. Address the admin as "you".
+- Use the association's name when you have it.
+- Never make up data.`;
 
 type Prop = { type: string; description: string };
 function tool(name: string, description: string, properties: Record<string, Prop> = {}, required: string[] = []): Anthropic.Tool {
@@ -164,7 +171,8 @@ Total active members: ${stats.totalActiveMembers ?? "N/A"}
       const emit = (obj: unknown) => controller.enqueue(encoder.encode(line(obj)));
 
       while (true) {
-        const response = await client.messages.create({
+        // Use streaming so text appears progressively in the chat
+        const stream = client.messages.stream({
           model: "claude-opus-4-8",
           max_tokens: 2048,
           system: systemWithContext,
@@ -172,16 +180,23 @@ Total active members: ${stats.totalActiveMembers ?? "N/A"}
           messages: currentMessages,
         });
 
+        let accumulated = "";
+        for await (const event of stream) {
+          if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+            accumulated += event.delta.text;
+            emit({ type: "text", chunk: accumulated });
+          }
+        }
+
+        const response = await stream.finalMessage();
         const toolUseBlocks = response.content.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
-        const textBlocks = response.content.filter((b): b is Anthropic.TextBlock => b.type === "text");
 
         if (response.stop_reason === "end_turn" || toolUseBlocks.length === 0) {
-          emit({ type: "text", chunk: textBlocks.map((b) => b.text).join("") });
           controller.close();
           break;
         }
 
-        // Execute tools, stream viz events in parallel
+        // Execute tools, emit viz events
         const toolResults = await Promise.all(
           toolUseBlocks.map(async (block) => {
             let result: unknown;
