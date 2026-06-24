@@ -498,7 +498,7 @@ function renderSingle(tool: string, d: R) {
 
   if (tool === "get_person" || tool === "get_contact") {
     return (
-      <VizCard title={[d.firstName, d.lastName].filter(Boolean).join(" ") || (String(d["@id"] ?? "").split("/").pop() ?? "Contact")} subtitle={String(d.email ?? d.type ?? "")}>
+      <VizCard title={[d.firstname, d.lastname].filter(Boolean).join(" ") || (String(d["@id"] ?? "").split("/").pop() ?? "Contact")} subtitle={String(d.email ?? d.type ?? "")}>
         <KeyValueCard data={d} />
       </VizCard>
     );

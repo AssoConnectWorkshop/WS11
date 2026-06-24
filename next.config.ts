@@ -1,10 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    turbo: {},
-  },
-  images: {
+images: {
     formats: ["image/avif", "image/webp"],
   },
 };
