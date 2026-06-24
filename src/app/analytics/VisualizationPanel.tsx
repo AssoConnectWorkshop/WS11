@@ -195,36 +195,34 @@ function renderStatsCrm(d: R) {
   );
 }
 
-function renderContacts(d: R) {
-  const contacts = (d.contacts as R[]) ?? [];
-  const total = (d.total as number) ?? contacts.length;
-  const byType = contacts.reduce((acc: Record<string, number>, c) => {
-    const t = (c.type as string) ?? "unknown";
-    acc[t] = (acc[t] ?? 0) + 1;
-    return acc;
-  }, {});
-  return (
-    <VizCard title="Contacts" subtitle={`${total.toLocaleString("fr-FR")} total`}>
-      {Object.keys(byType).length > 1 && (
-        <div style={{ marginBottom: "0.75rem" }}>
-          <DonutChart data={Object.entries(byType).map(([label, value]) => ({ label, value }))} />
-        </div>
-      )}
-      <DataTable
-        rows={contacts}
-        total={total}
-        columns={[
-          { key: "id", label: "ID", fmt: v => String(v ?? "").slice(0, 10) + "…" },
-          { key: "type", label: "Type" },
-          { key: "email", label: "Email", fmt: v => v ? String(v) : "—" },
-        ]}
-      />
-    </VizCard>
-  );
-}
 
 function renderHydraCollection(tool: string, members: R[], total: number) {
   const label = tool.replace(/_/g, " ").replace(/^list /, "");
+
+  if (tool === "list_contacts") {
+    const byStatus: Record<string, number> = {};
+    members.forEach(c => {
+      const s = String((c.customFields as R)?.Statut ?? "—");
+      byStatus[s] = (byStatus[s] ?? 0) + 1;
+    });
+    const hasStatuses = Object.keys(byStatus).length > 1;
+    return (
+      <VizCard title="Contacts" subtitle={`${total.toLocaleString("fr-FR")} total`}>
+        {hasStatuses && (
+          <div style={{ marginBottom: "0.75rem" }}>
+            <DonutChart data={Object.entries(byStatus).map(([l, v]) => ({ label: l, value: v }))} />
+          </div>
+        )}
+        <DataTable rows={members} total={total} columns={[
+          { key: "firstname", label: "First name", fmt: v => String(v ?? "—") },
+          { key: "lastname", label: "Last name", fmt: v => String(v ?? "—") },
+          { key: "email", label: "Email", fmt: v => v ? String(v) : "—" },
+          { key: "postalAddress", label: "City", fmt: v => v ? String((v as R).city ?? "—") : "—" },
+          { key: "customFields", label: "Status", fmt: v => v ? String((v as R).Statut ?? "—") : "—" },
+        ]} />
+      </VizCard>
+    );
+  }
 
   if (tool === "list_invoices") {
     return (
@@ -544,7 +542,6 @@ function renderItem(tool: string, data: unknown): React.ReactNode {
   const d = data as R;
 
   if (tool === "get_stats_crm") return renderStatsCrm(d);
-  if (tool === "list_contacts") return renderContacts(d);
 
   // Hydra collections
   if (Array.isArray(d["hydra:member"])) {
