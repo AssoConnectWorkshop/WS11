@@ -18,99 +18,131 @@ const NAV_ITEMS = [
   { label: "Master Admin", icon: "⚙️", hasChildren: true },
 ];
 
-function Sidebar({ active }: { active: string }) {
+const SUGGESTIONS = [
+  "How many active members do I have?",
+  "List 10 contacts with their addresses",
+  "Give me a summary of my association",
+  "What should I focus on this month?",
+];
+
+function Sidebar() {
   return (
     <aside
       className="flex flex-col w-56 min-h-screen flex-none"
-      style={{ background: "#1B3B99" }}
+      style={{ background: "var(--gradient-cta)" }}
     >
-      {/* Logo */}
-      <div className="flex flex-col items-center gap-1 px-4 pt-5 pb-4">
+      {/* Logo + org */}
+      <div className="flex flex-col items-center gap-1 px-4 pt-6 pb-4">
         <div
-          className="w-12 h-12 rounded-xl flex items-center justify-center"
-          style={{ background: "#fff" }}
+          className="w-12 h-12 flex items-center justify-center"
+          style={{ borderRadius: "var(--radius-xl)", background: "var(--color-white)" }}
         >
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
             <path
               d="M14 4C9.03 4 5 8.03 5 13c0 3.27 1.67 6.15 4.2 7.84L14 24l4.8-3.16A9 9 0 0 0 23 13c0-4.97-4.03-9-9-9Z"
-              fill="#E8334A"
+              fill="#316BF2"
             />
-            <path d="M14 10.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" fill="#fff" />
+            <path d="M14 10.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" fill="white" />
           </svg>
         </div>
-        <span className="text-white text-xs font-semibold mt-1 truncate w-full text-center">
+        <span
+          className="text-xs font-medium mt-1 truncate w-full text-center"
+          style={{ color: "var(--color-white)", fontFamily: "var(--font-heading)", letterSpacing: "-0.3px" }}
+        >
           Victor test 3…
         </span>
         <span
-          className="text-xs font-medium px-2 py-0.5 rounded-full"
-          style={{ background: "#F59E0B", color: "#fff" }}
+          className="text-xs font-medium px-2 py-0.5"
+          style={{
+            background: "var(--color-accent-yellow)",
+            color: "var(--color-text-title)",
+            borderRadius: "var(--radius-sm)",
+            fontFamily: "var(--font-body)",
+          }}
         >
           Chapter
         </span>
-        <span className="text-white/60 text-xs mt-0.5">Victor BUCHTER</span>
+        <span
+          className="text-xs mt-0.5"
+          style={{ color: "rgba(255,255,255,0.6)", fontFamily: "var(--font-body)" }}
+        >
+          Victor BUCHTER
+        </span>
       </div>
 
-      <div className="w-full h-px" style={{ background: "rgba(255,255,255,0.15)" }} />
+      <div style={{ background: "rgba(255,255,255,0.15)", height: "1px", margin: "0 1rem" }} />
 
-      {/* Navigation */}
-      <nav className="flex flex-col flex-1 px-2 py-3 gap-0.5 overflow-y-auto">
+      {/* Nav items */}
+      <nav className="flex flex-col flex-1 py-3 overflow-y-auto" style={{ gap: "2px", padding: "0.75rem 0.5rem" }}>
         {NAV_ITEMS.map((item) => (
           <button
             key={item.label}
-            className="flex items-center gap-2.5 w-full text-left px-3 py-2 rounded-lg text-sm transition-colors"
+            className="flex items-center w-full text-left"
             style={{
+              gap: "var(--gap-s)",
+              padding: "0.5rem 0.75rem",
+              borderRadius: "var(--radius-md)",
               color: "rgba(255,255,255,0.75)",
               background: "transparent",
+              fontFamily: "var(--font-body)",
+              fontSize: "0.875rem",
+              transition: "background var(--duration-fast) var(--easing-standard)",
+              cursor: "pointer",
+              border: "none",
             }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background =
-                "rgba(255,255,255,0.1)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background =
-                "transparent";
-            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
           >
-            <span className="text-base w-5 text-center">{item.icon}</span>
-            <span className="flex-1">{item.label}</span>
-            {item.hasChildren && (
-              <span className="text-white/40 text-xs">›</span>
-            )}
+            <span style={{ fontSize: "1rem", width: "1.25rem", textAlign: "center" }}>{item.icon}</span>
+            <span style={{ flex: 1 }}>{item.label}</span>
+            {item.hasChildren && <span style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.75rem" }}>›</span>}
           </button>
         ))}
 
-        {/* PopliCOACH — active */}
-        <div className="mt-2">
-          <div className="w-full h-px mb-2" style={{ background: "rgba(255,255,255,0.15)" }} />
+        {/* PopliCOACH */}
+        <div style={{ margin: "0.5rem 0" }}>
+          <div style={{ background: "rgba(255,255,255,0.15)", height: "1px", marginBottom: "0.5rem" }} />
           <div
-            className="flex items-center gap-2.5 w-full text-left px-3 py-2 rounded-lg text-sm font-semibold"
+            className="flex items-center w-full"
             style={{
-              background: "rgba(255,255,255,0.18)",
-              color: "#fff",
+              gap: "var(--gap-s)",
+              padding: "0.5rem 0.75rem",
+              borderRadius: "var(--radius-md)",
+              background: "rgba(255,255,255,0.2)",
+              color: "var(--color-white)",
+              fontFamily: "var(--font-heading)",
+              fontSize: "0.875rem",
+              letterSpacing: "-0.3px",
+              boxShadow: "0 0 0 1px rgba(255,255,255,0.25)",
             }}
           >
-            <span className="text-base w-5 text-center">✨</span>
-            <span className="flex-1">PopliCOACH</span>
+            <span style={{ fontSize: "1rem", width: "1.25rem", textAlign: "center" }}>✨</span>
+            <span style={{ flex: 1 }}>PopliCOACH</span>
           </div>
         </div>
       </nav>
 
       {/* Settings */}
-      <div className="px-2 pb-4">
-        <div className="w-full h-px mb-3" style={{ background: "rgba(255,255,255,0.15)" }} />
+      <div style={{ padding: "0 0.5rem 1rem" }}>
+        <div style={{ background: "rgba(255,255,255,0.15)", height: "1px", marginBottom: "0.75rem" }} />
         <button
-          className="flex items-center gap-2.5 w-full text-left px-3 py-2 rounded-lg text-sm transition-colors"
-          style={{ color: "rgba(255,255,255,0.65)" }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background =
-              "rgba(255,255,255,0.1)";
+          className="flex items-center w-full text-left"
+          style={{
+            gap: "var(--gap-s)",
+            padding: "0.5rem 0.75rem",
+            borderRadius: "var(--radius-md)",
+            color: "rgba(255,255,255,0.6)",
+            background: "transparent",
+            fontFamily: "var(--font-body)",
+            fontSize: "0.875rem",
+            transition: "background var(--duration-fast) var(--easing-standard)",
+            cursor: "pointer",
+            border: "none",
           }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background =
-              "transparent";
-          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
         >
-          <span className="text-base w-5 text-center">⚙</span>
+          <span style={{ fontSize: "1rem", width: "1.25rem", textAlign: "center" }}>⚙</span>
           <span>Settings</span>
         </button>
       </div>
@@ -179,25 +211,70 @@ export default function ChatClient() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <Sidebar active="PopliCOACH" />
+    <div className="flex h-screen overflow-hidden" style={{ background: "var(--color-bg-grey)" }}>
+      <Sidebar />
 
-      {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
         {/* Top bar */}
-        <header className="flex items-center justify-between px-6 py-3 bg-white border-b flex-none">
-          <div className="flex items-center gap-3">
-            <span className="text-lg">✨</span>
+        <header
+          className="flex items-center justify-between flex-none"
+          style={{
+            background: "var(--color-white)",
+            borderBottom: "1px solid var(--color-border)",
+            padding: "0.75rem 1.5rem",
+          }}
+        >
+          <div className="flex items-center" style={{ gap: "var(--gap-s)" }}>
+            <div
+              className="flex items-center justify-center"
+              style={{
+                width: "2.25rem",
+                height: "2.25rem",
+                borderRadius: "var(--radius-md)",
+                background: "var(--color-bg-blue)",
+                fontSize: "1.1rem",
+              }}
+            >
+              ✨
+            </div>
             <div>
-              <h1 className="text-base font-semibold text-gray-900">PopliCOACH</h1>
-              <p className="text-xs text-gray-400">AI analytics assistant for your association</p>
+              <h1
+                style={{
+                  fontFamily: "var(--font-heading)",
+                  fontSize: "1rem",
+                  color: "var(--color-text-title)",
+                  letterSpacing: "-0.6px",
+                  margin: 0,
+                }}
+              >
+                PopliCOACH
+              </h1>
+              <p
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.75rem",
+                  color: "var(--color-text-muted)",
+                  margin: 0,
+                }}
+              >
+                AI analytics assistant for your association
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400">en_US</span>
+          <div className="flex items-center" style={{ gap: "var(--gap-s)" }}>
+            <span style={{ fontSize: "0.75rem", color: "var(--color-text-muted)", fontFamily: "var(--font-body)" }}>
+              en_US
+            </span>
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
-              style={{ background: "#1B3B99" }}
+              className="flex items-center justify-center text-white text-xs font-medium"
+              style={{
+                width: "2rem",
+                height: "2rem",
+                borderRadius: "50%",
+                background: "var(--gradient-cta)",
+                fontFamily: "var(--font-heading)",
+                letterSpacing: "-0.3px",
+              }}
             >
               VB
             </div>
@@ -205,32 +282,76 @@ export default function ChatClient() {
         </header>
 
         {/* Chat area */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
+        <div
+          className="flex-1 overflow-y-auto"
+          style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "var(--gap-m)" }}
+        >
           {messages.length === 0 && (
-            <div className="flex flex-col items-center gap-4 mt-16">
+            <div
+              className="flex flex-col items-center"
+              style={{ marginTop: "4rem", gap: "var(--gap-m)" }}
+            >
               <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"
-                style={{ background: "#EEF2FF" }}
+                className="flex items-center justify-center"
+                style={{
+                  width: "3.5rem",
+                  height: "3.5rem",
+                  borderRadius: "var(--radius-xl)",
+                  background: "var(--color-bg-blue)",
+                  fontSize: "1.5rem",
+                }}
               >
                 ✨
               </div>
               <div className="text-center">
-                <h2 className="text-lg font-semibold text-gray-800">How can I help you today?</h2>
-                <p className="text-sm text-gray-400 mt-1">Ask anything about your members, contacts, or finances.</p>
+                <h2
+                  style={{
+                    fontFamily: "var(--font-heading)",
+                    fontSize: "1.25rem",
+                    color: "var(--color-text-title)",
+                    letterSpacing: "-0.6px",
+                    margin: "0 0 0.5rem",
+                  }}
+                >
+                  How can I help you today?
+                </h2>
+                <p
+                  style={{
+                    fontFamily: "var(--font-body)",
+                    fontSize: "0.875rem",
+                    color: "var(--color-text-muted)",
+                    margin: 0,
+                  }}
+                >
+                  Ask anything about your members, contacts, or finances.
+                </p>
               </div>
-              <div className="flex flex-wrap gap-2 justify-center mt-2">
-                {[
-                  "How many active members do I have?",
-                  "List 10 contacts with their addresses",
-                  "Give me a summary of my association",
-                  "What should I focus on this month?",
-                ].map((suggestion) => (
+              <div className="flex flex-wrap justify-center" style={{ gap: "var(--gap-s)", marginTop: "0.5rem" }}>
+                {SUGGESTIONS.map((s) => (
                   <button
-                    key={suggestion}
-                    onClick={() => setInput(suggestion)}
-                    className="text-sm border rounded-full px-4 py-2 bg-white hover:bg-gray-50 transition-colors text-gray-600 shadow-sm"
+                    key={s}
+                    onClick={() => setInput(s)}
+                    style={{
+                      fontFamily: "var(--font-body)",
+                      fontSize: "0.8125rem",
+                      color: "var(--color-primary)",
+                      background: "var(--color-white)",
+                      border: "1px solid var(--color-secondary)",
+                      borderRadius: "var(--radius-3xl)",
+                      padding: "0.5rem 1rem",
+                      cursor: "pointer",
+                      transition: "background var(--duration-fast) var(--easing-standard), border-color var(--duration-fast) var(--easing-standard)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "var(--color-bg-blue)";
+                      e.currentTarget.style.borderColor = "var(--color-primary)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "var(--color-white)";
+                      e.currentTarget.style.borderColor = "var(--color-secondary)";
+                    }}
                   >
-                    {suggestion}
+                    {s}
                   </button>
                 ))}
               </div>
@@ -240,29 +361,64 @@ export default function ChatClient() {
           {messages.map((msg, i) => (
             <div
               key={i}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              className="flex"
+              style={{ justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}
             >
               {msg.role === "assistant" && (
                 <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-sm mr-2 flex-none mt-0.5"
-                  style={{ background: "#EEF2FF" }}
+                  className="flex items-center justify-center flex-none"
+                  style={{
+                    width: "1.75rem",
+                    height: "1.75rem",
+                    borderRadius: "var(--radius-md)",
+                    background: "var(--color-bg-blue)",
+                    fontSize: "0.875rem",
+                    marginRight: "0.5rem",
+                    marginTop: "0.25rem",
+                  }}
                 >
                   ✨
                 </div>
               )}
               <div
-                className="max-w-[75%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap leading-relaxed"
-                style={
-                  msg.role === "user"
-                    ? { background: "#1B3B99", color: "#fff", borderBottomRightRadius: "4px" }
-                    : { background: "#fff", color: "#1a1a1a", borderBottomLeftRadius: "4px", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }
-                }
+                style={{
+                  maxWidth: "72%",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "var(--radius-xl)",
+                  borderBottomRightRadius: msg.role === "user" ? "var(--radius-xs)" : "var(--radius-xl)",
+                  borderBottomLeftRadius: msg.role === "assistant" ? "var(--radius-xs)" : "var(--radius-xl)",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.875rem",
+                  lineHeight: "1.6",
+                  whiteSpace: "pre-wrap",
+                  ...(msg.role === "user"
+                    ? {
+                        background: "var(--gradient-cta)",
+                        color: "var(--color-white)",
+                      }
+                    : {
+                        background: "var(--color-white)",
+                        color: "var(--color-text-body)",
+                        border: "1px solid var(--color-border)",
+                        boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                      }),
+                }}
               >
                 {msg.content || (
-                  <span className="flex gap-1 items-center h-4">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <span className="flex items-center" style={{ gap: "0.25rem", height: "1rem" }}>
+                    {[0, 150, 300].map((delay) => (
+                      <span
+                        key={delay}
+                        style={{
+                          width: "0.375rem",
+                          height: "0.375rem",
+                          borderRadius: "50%",
+                          background: "var(--color-accent-mint)",
+                          display: "inline-block",
+                          animation: `bounce 1s ease-in-out ${delay}ms infinite`,
+                        }}
+                      />
+                    ))}
                   </span>
                 )}
               </div>
@@ -272,22 +428,56 @@ export default function ChatClient() {
         </div>
 
         {/* Input bar */}
-        <div className="flex-none bg-white border-t px-6 py-4">
-          <form onSubmit={send} className="flex gap-3 max-w-3xl mx-auto">
+        <div
+          style={{
+            flexShrink: 0,
+            background: "var(--color-white)",
+            borderTop: "1px solid var(--color-border)",
+            padding: "1rem 1.5rem",
+          }}
+        >
+          <form
+            onSubmit={send}
+            className="flex"
+            style={{ gap: "var(--gap-s)", maxWidth: "48rem", margin: "0 auto" }}
+          >
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about your association…"
               disabled={loading}
-              className="flex-1 border rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 disabled:opacity-50"
-              style={{ "--tw-ring-color": "#1B3B99" } as React.CSSProperties}
+              style={{
+                flex: 1,
+                border: "1px solid var(--color-border)",
+                borderRadius: "var(--radius-lg)",
+                padding: "0.625rem 1rem",
+                fontFamily: "var(--font-body)",
+                fontSize: "0.875rem",
+                color: "var(--color-text-body)",
+                background: "var(--color-white)",
+                outline: "none",
+                transition: "border-color var(--duration-fast) var(--easing-standard)",
+              }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "var(--color-primary)"; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "var(--color-border)"; }}
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="text-white rounded-xl px-5 py-2.5 text-sm font-medium disabled:opacity-40 transition-opacity"
-              style={{ background: "#1B3B99" }}
+              style={{
+                background: "var(--gradient-cta)",
+                color: "var(--color-white)",
+                border: "none",
+                borderRadius: "var(--radius-lg)",
+                padding: "0.625rem 1.25rem",
+                fontFamily: "var(--font-heading)",
+                fontSize: "0.875rem",
+                letterSpacing: "-0.3px",
+                cursor: loading || !input.trim() ? "not-allowed" : "pointer",
+                opacity: loading || !input.trim() ? 0.45 : 1,
+                transition: "opacity var(--duration-fast) var(--easing-standard)",
+              }}
             >
               Send
             </button>
@@ -295,11 +485,32 @@ export default function ChatClient() {
         </div>
 
         {/* Footer */}
-        <div className="flex-none bg-white border-t px-6 py-1.5 flex items-center justify-between text-xs text-gray-300">
-          <span>Built with love avec mon cul et Claudo AI — {APP_VERSION}</span>
-          <span>CGUV: yolo lol</span>
+        <div
+          style={{
+            flexShrink: 0,
+            background: "var(--color-bg-grey)",
+            borderTop: "1px solid var(--color-border)",
+            padding: "0.375rem 1.5rem",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span style={{ fontFamily: "var(--font-body)", fontSize: "0.75rem", color: "var(--color-text-muted)" }}>
+            Built with love avec mon cul et Claudo AI — {APP_VERSION}
+          </span>
+          <span style={{ fontFamily: "var(--font-body)", fontSize: "0.75rem", color: "var(--color-text-muted)" }}>
+            CGUV: yolo lol
+          </span>
         </div>
       </div>
+
+      <style>{`
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
+        }
+      `}</style>
     </div>
   );
 }

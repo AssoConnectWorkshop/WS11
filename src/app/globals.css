@@ -1,18 +1,61 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Roboto:wght@400;500&display=swap');
 
-@theme {
-  --color-background: #ffffff;
-  --color-foreground: #0a0a0a;
+:root {
+  --color-primary: #316BF2;
+  --color-primary-hover: #0040D7;
+  --color-primary-20: rgba(49,107,242,0.2);
+  --color-secondary: #CDDCFF;
+  --color-bg-blue: #E6EDFD;
+  --color-bg-grey: #F2F2F2;
+  --color-white: #FFFFFF;
+  --color-text-title: #0A0A0A;
+  --color-text-body: #626262;
+  --color-text-muted: #737373;
+  --color-border: #E5E5E5;
+  --color-success: #00C1A2;
+  --color-error: #DC2626;
+  --color-accent-mint: #87DFD5;
+  --color-accent-yellow: #F6C131;
+  --gradient-hero: linear-gradient(135deg, #E6EDFD 0%, #CDDCFF 100%);
+  --gradient-cta: linear-gradient(135deg, #316BF2 0%, #0040D7 100%);
+  --gradient-mint: linear-gradient(rgb(135, 223, 213), rgb(135, 223, 213));
+  --gradient-subtle: linear-gradient(180deg, var(--color-white), var(--color-bg-grey));
+  --font-heading: 'Poppins', sans-serif;
+  --font-body: 'Roboto', sans-serif;
+  --spacing-section-xl: 8rem;
+  --spacing-section-l: 6rem;
+  --spacing-section-m: 4rem;
+  --gap-xl: 3rem;
+  --gap-l: 2rem;
+  --gap-m: 1.5rem;
+  --gap-s: 0.75rem;
+  --gap-xs: 0.5rem;
+  --section-title-gap: 1.5rem;
+  --radius-xs: 2px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+  --duration-fast: 150ms;
+  --duration-standard: 300ms;
+  --duration-enter: 400ms;
+  --easing-standard: ease-out;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: #0a0a0a;
-    --color-foreground: #ededed;
-  }
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
 }
 
 body {
-  background: var(--color-background);
-  color: var(--color-foreground);
+  background: var(--color-white);
+  color: var(--color-text-body);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--color-text-title);
 }
