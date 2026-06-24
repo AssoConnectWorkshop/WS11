@@ -6,6 +6,23 @@ import VisualizationPanel, { VizItem } from "./VisualizationPanel";
 
 type Message = { role: "user" | "assistant"; content: string };
 
+function renderMarkdown(text: string) {
+  const lines = text.split("\n");
+  return lines.map((line, i) => {
+    // Skip markdown table rows — they belong in render_visualization
+    if (line.trim().startsWith("|")) return null;
+    // Bold + italic inline
+    const parts = line.split(/(\*\*\*.*?\*\*\*|\*\*.*?\*\*|\*.*?\*)/g);
+    const inline = parts.map((p, j) => {
+      if (p.startsWith("***") && p.endsWith("***")) return <strong key={j}><em>{p.slice(3, -3)}</em></strong>;
+      if (p.startsWith("**") && p.endsWith("**")) return <strong key={j}>{p.slice(2, -2)}</strong>;
+      if (p.startsWith("*") && p.endsWith("*")) return <em key={j}>{p.slice(1, -1)}</em>;
+      return p;
+    });
+    return <span key={i}>{inline}{i < lines.length - 1 ? "\n" : ""}</span>;
+  }).filter(Boolean);
+}
+
 const NAV_ITEMS = [
   { label: "Home", icon: "⊞" },
   { label: "Community", icon: "👥", hasChildren: true },
@@ -226,7 +243,7 @@ export default function ChatClient() {
                       ? { background: "var(--gradient-cta)", color: "var(--color-white)" }
                       : { background: "var(--color-white)", color: "var(--color-text-body)", border: "1px solid var(--color-border)", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }),
                   }}>
-                    {msg.content || (
+                    {msg.content ? renderMarkdown(msg.content) : (
                       <span className="flex items-center" style={{ gap: "0.25rem", height: "1rem" }}>
                         {[0, 150, 300].map((d) => (
                           <span key={d} style={{ width: "0.3125rem", height: "0.3125rem", borderRadius: "50%", background: "var(--color-accent-mint)", display: "inline-block", animation: `bounce 1s ease-in-out ${d}ms infinite` }} />
