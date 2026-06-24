@@ -535,6 +535,56 @@ function renderSingle(tool: string, d: R) {
   );
 }
 
+type CollectMember = {
+  membership?: { plan?: { price?: number; type?: string } };
+  donation?: { amount?: number };
+};
+type Collect = R & { name?: string; pricingPlans?: R[]; members?: CollectMember[] };
+
+function renderFetchCollects(data: unknown) {
+  const collects: Collect[] = Array.isArray(data) ? data as Collect[] : [data as Collect];
+
+  let totalMembership = 0, totalDonation = 0;
+  const perCollect: { label: string; membership: number; donation: number }[] = [];
+
+  for (const c of collects) {
+    let cMembership = 0, cDonation = 0;
+    for (const m of c.members ?? []) {
+      cMembership += m.membership?.plan?.price ?? 0;
+      cDonation += m.donation?.amount ?? 0;
+    }
+    totalMembership += cMembership;
+    totalDonation += cDonation;
+    perCollect.push({ label: String(c.name ?? "Collecte"), membership: cMembership, donation: cDonation });
+  }
+
+  const total = totalMembership + totalDonation;
+
+  return (
+    <VizCard title="Adhésions & Dons" subtitle={`${collects.length} collecte${collects.length > 1 ? "s" : ""} · ${total.toLocaleString("fr-FR")} € au total`}>
+      <DonutChart data={[
+        { label: "Adhésions", value: totalMembership },
+        { label: "Dons", value: totalDonation },
+      ]} />
+      {perCollect.length > 1 && (
+        <div style={{ marginTop: "0.75rem" }}>
+          <div style={{ fontFamily: "Roboto, sans-serif", fontSize: "0.6875rem", color: "var(--color-text-muted)", marginBottom: "0.375rem" }}>Par collecte</div>
+          <HBarChart data={perCollect.map(c => ({ label: c.label, value: c.membership + c.donation }))} />
+        </div>
+      )}
+      <div style={{ marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+        {perCollect.map((c, i) => (
+          <div key={i} style={{ display: "flex", justifyContent: "space-between", fontFamily: "Roboto, sans-serif", fontSize: "0.6875rem", padding: "0.25rem 0", borderBottom: "1px solid var(--color-border)" }}>
+            <span style={{ color: "var(--color-text-body)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: "0.5rem" }}>{c.label}</span>
+            <span style={{ color: "var(--color-primary)", flexShrink: 0 }}>{c.membership.toLocaleString("fr-FR")} €</span>
+            {c.donation > 0 && <span style={{ color: "var(--color-accent-mint)", flexShrink: 0, marginLeft: "0.5rem" }}>+{c.donation.toLocaleString("fr-FR")} € dons</span>}
+          </div>
+        ))}
+      </div>
+    </VizCard>
+  );
+}
+
 // ─── Main dispatcher ──────────────────────────────────────────────────────────
 
 function renderItem(tool: string, data: unknown): React.ReactNode {
@@ -542,6 +592,7 @@ function renderItem(tool: string, data: unknown): React.ReactNode {
   const d = data as R;
 
   if (tool === "get_stats_crm") return renderStatsCrm(d);
+  if (tool === "fetch_collects") return renderFetchCollects(data);
 
   // Hydra collections
   if (Array.isArray(d["hydra:member"])) {
